@@ -68,6 +68,8 @@ export function TopBar({ activePath = "/" }: { activePath?: string }) {
                 <Link href="/savedPage">♡ <span>Saved rooms</span></Link>
                 <Link href="/historyPage">◷ <span>Listening history</span></Link>
                 <Link href="/settingsPage">⚙ <span>Settings</span></Link>
+                <Link href="/loginPage">↪ <span>Sign in</span></Link>
+                <Link href="/registerPage">＋ <span>Create account</span></Link>
                 <button className="manage-profile" onClick={openProfileModal}>
                   Manage profile <span>→</span>
                 </button>
