@@ -11,6 +11,7 @@ export const mockRooms: Room[] = [
     initials: "M",
     avatar: "#d9795f",
     avatarUrl: "https://i.pravatar.cc/160?img=47",
+    location: { name: "Ari", city: "Bangkok", latitude: 13.7804, longitude: 100.5448 },
   },
   {
     id: 2,
@@ -22,6 +23,7 @@ export const mockRooms: Room[] = [
     initials: "N",
     avatar: "#7653c8",
     avatarUrl: "https://i.pravatar.cc/160?img=32",
+    location: { name: "Nimman", city: "Chiang Mai", latitude: 18.7961, longitude: 98.9673 },
   },
   {
     id: 3,
@@ -33,6 +35,7 @@ export const mockRooms: Room[] = [
     initials: "G",
     avatar: "#dc936d",
     avatarUrl: "https://i.pravatar.cc/160?img=12",
+    location: { name: "Thonglor", city: "Bangkok", latitude: 13.7307, longitude: 100.5786 },
   },
   {
     id: 4,
@@ -44,6 +47,7 @@ export const mockRooms: Room[] = [
     initials: "F",
     avatar: "#db6e8a",
     avatarUrl: "https://i.pravatar.cc/160?img=5",
+    location: { name: "Old Town", city: "Phuket", latitude: 7.884, longitude: 98.3923 },
   },
 ];
 

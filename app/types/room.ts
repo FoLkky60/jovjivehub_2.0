@@ -8,6 +8,12 @@ export type Room = {
   initials: string;
   avatar: string;
   avatarUrl?: string;
+  location: {
+    name: string;
+    city: string;
+    latitude: number;
+    longitude: number;
+  };
 };
 
 export type ChatMessage = {

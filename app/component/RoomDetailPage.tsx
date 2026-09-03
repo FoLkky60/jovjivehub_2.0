@@ -43,7 +43,7 @@ export function RoomDetailPage({ roomId }: { roomId: number }) {
               {isOptionsOpen && <div className="room-options"><button onClick={() => setIsOptionsOpen(false)}>♡ Save room</button><button onClick={() => navigator.clipboard?.writeText(window.location.href)}>↗ Copy room link</button><button onClick={() => setIsOptionsOpen(false)}>⚑ Report room</button></div>}
             </div>
           </div>
-          <LiveStage room={activeRoom} />
+          <LiveStage key={activeRoom.id} room={activeRoom} />
           <PeopleRow />
           <div className="conversation-heading"><h2>Conversation</h2><span>Newest first</span></div>
           <div className="mobile-chat">{messages.slice(-3).map((item) => <MessageItem key={item.id} message={item} />)}</div>
