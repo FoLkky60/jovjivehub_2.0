@@ -16,6 +16,7 @@ export function RoomDetailPage({ roomId }: { roomId: number }) {
   const rooms = getMockRooms();
   const activeRoom = rooms.find((room) => room.id === roomId) ?? rooms[0];
   const [messages, setMessages] = useState(getMockMessages);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
   function sendMessage(text: string) {
     setMessages((currentMessages) => [...currentMessages, createMockMessage(text)]);
@@ -37,7 +38,10 @@ export function RoomDetailPage({ roomId }: { roomId: number }) {
               <h1>{activeRoom.title}</h1>
               <p>Hosted by <strong>@{activeRoom.host}</strong> <span className="verified">✓</span></p>
             </div>
-            <button className="more-button" aria-label="More options" onClick={() => alert("Mock: room options")}>•••</button>
+            <div className="room-options-wrap">
+              <button className="more-button" aria-label="More options" onClick={() => setIsOptionsOpen(!isOptionsOpen)}>•••</button>
+              {isOptionsOpen && <div className="room-options"><button onClick={() => setIsOptionsOpen(false)}>♡ Save room</button><button onClick={() => navigator.clipboard?.writeText(window.location.href)}>↗ Copy room link</button><button onClick={() => setIsOptionsOpen(false)}>⚑ Report room</button></div>}
+            </div>
           </div>
           <LiveStage room={activeRoom} />
           <PeopleRow />

@@ -10,6 +10,7 @@ export const mockRooms: Room[] = [
     color: "#f4b650",
     initials: "M",
     avatar: "#d9795f",
+    avatarUrl: "https://i.pravatar.cc/160?img=47",
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ export const mockRooms: Room[] = [
     color: "#bb88f4",
     initials: "N",
     avatar: "#7653c8",
+    avatarUrl: "https://i.pravatar.cc/160?img=32",
   },
   {
     id: 3,
@@ -30,6 +32,7 @@ export const mockRooms: Room[] = [
     color: "#61c7b2",
     initials: "G",
     avatar: "#dc936d",
+    avatarUrl: "https://i.pravatar.cc/160?img=12",
   },
   {
     id: 4,
@@ -40,6 +43,7 @@ export const mockRooms: Room[] = [
     color: "#e977a3",
     initials: "F",
     avatar: "#db6e8a",
+    avatarUrl: "https://i.pravatar.cc/160?img=5",
   },
 ];
 

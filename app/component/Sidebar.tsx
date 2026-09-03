@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Room } from "@/app/types/room";
 import { RoomList } from "@/app/component/RoomList";
 
@@ -10,6 +13,8 @@ export function Sidebar({
   activeRoomId: number;
   onSelect: (room: Room) => void;
 }) {
+  const router = useRouter();
+
   return (
     <aside className="sidebar">
       <div className="side-heading">
@@ -19,7 +24,7 @@ export function Sidebar({
       <RoomList rooms={rooms} activeRoomId={activeRoomId} onSelect={onSelect} />
       <button
         className="see-all"
-        onClick={() => alert("Mock: showing all 12 live rooms")}
+        onClick={() => router.push("/")}
       >
         See all rooms <span>→</span>
       </button>

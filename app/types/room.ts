@@ -7,6 +7,7 @@ export type Room = {
   color: string;
   initials: string;
   avatar: string;
+  avatarUrl?: string;
 };
 
 export type ChatMessage = {

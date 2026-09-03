@@ -41,10 +41,8 @@ export function TopBar({ activePath = "/" }: { activePath?: string }) {
         <nav className="topnav">
           <Link className={activePath === "/" ? "nav-active" : ""} href="/">Discover</Link>
           <Link className={activePath === "/following" ? "nav-active" : ""} href="/following">Following</Link>
-          <Link className={activePath === "/about" ? "nav-active" : ""} href="/about">About</Link>
         </nav>
         <div className="top-actions">
-          <button className="icon-button" aria-label="Search" onClick={() => alert("Mock search: try browsing live rooms")}>⌕</button>
           <button className="new-room" onClick={() => setIsOpen(true)}>＋ Open a room</button>
           <div className="profile-menu-wrap">
             <button
@@ -66,6 +64,7 @@ export function TopBar({ activePath = "/" }: { activePath?: string }) {
                 </div>
                 <div className="profile-menu-divider" />
                 <span className="profile-menu-label">YOUR SPACE</span>
+                <Link href="/profilePage">◉ <span>Profile</span></Link>
                 <Link href="/savedPage">♡ <span>Saved rooms</span></Link>
                 <Link href="/historyPage">◷ <span>Listening history</span></Link>
                 <Link href="/settingsPage">⚙ <span>Settings</span></Link>
