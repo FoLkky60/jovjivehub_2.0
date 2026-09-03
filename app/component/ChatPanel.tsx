@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { SubmitEvent, useState } from "react";
 import { ChatMessage } from "@/app/types/room";
 import { MessageItem } from "@/app/component/MessageItem";
 
@@ -12,7 +12,7 @@ export function ChatPanel({
   onSend: (text: string) => void;
 }) {
   const [message, setMessage] = useState("");
-  function submit(event: FormEvent<HTMLFormElement>) {
+  function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = message.trim();
     if (!text) return;

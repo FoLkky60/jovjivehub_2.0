@@ -4,11 +4,12 @@ import { useMemo, useState } from "react";
 import { RoomCard } from "@/app/component/RoomCard";
 import { TopBar } from "@/app/component/TopBar";
 import { getMockRooms } from "@/app/services/mock-room-service";
+import { Room } from "@/app/types/room";
 
 const topics = ["All rooms", "Life & feelings", "Music lounge", "Startup & work", "Movies"];
 
 export function HomeDashboardPage() {
-  const rooms = getMockRooms();
+  const [rooms, setRooms] = useState<Room[]>(getMockRooms);
   const [activeTopic, setActiveTopic] = useState("All rooms");
   const [query, setQuery] = useState("");
   const visibleRooms = useMemo(
@@ -22,7 +23,7 @@ export function HomeDashboardPage() {
 
   return (
     <div className="app-shell">
-      <TopBar activePath="/" />
+      <TopBar activePath="/" onRoomCreated={(room) => setRooms((currentRooms) => [room, ...currentRooms])} />
       <main className="home-content">
         <section className="home-hero">
           <div>
@@ -30,7 +31,7 @@ export function HomeDashboardPage() {
             <h1>Find a room<br /><em>worth staying in.</em></h1>
             <p>Real conversations, happening right now.<br />Drop in, listen close, and be part of it.</p>
           </div>
-          <div className="hero-orbit"><span>12</span><small>rooms<br />live now</small></div>
+          <div className="hero-orbit"><span>{rooms.length}</span><small>rooms<br />live now</small></div>
         </section>
 
         <section className="home-toolbar" aria-label="Room filters">

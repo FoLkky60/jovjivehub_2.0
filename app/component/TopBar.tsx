@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { SubmitEvent, useState } from "react";
+import { addMockRoom } from "@/app/services/mock-room-service";
+import { Room } from "@/app/types/room";
 
-export function TopBar({ activePath = "/" }: { activePath?: string }) {
+export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: string; onRoomCreated?: (room: Room) => void }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -20,9 +22,22 @@ export function TopBar({ activePath = "/" }: { activePath?: string }) {
     setRoomTitle("");
   }
 
-  function createRoom(event: FormEvent<HTMLFormElement>) {
+  function createRoom(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!roomTitle.trim()) return;
+    const room = {
+      id: Date.now(),
+      title: roomTitle.trim(),
+      host: "jovjive_user",
+      topic,
+      listeners: "1",
+      color: "#f4b650",
+      initials: roomTitle.trim().charAt(0).toUpperCase(),
+      avatar: "#d9795f",
+      location: { name: "Online", city: "Online", latitude: 0, longitude: 0 },
+    } satisfies Room;
+    addMockRoom(room);
+    onRoomCreated?.(room);
     setCreated(true);
   }
 
@@ -40,6 +55,7 @@ export function TopBar({ activePath = "/" }: { activePath?: string }) {
         </div>
         <nav className="topnav">
           <Link className={activePath === "/" ? "nav-active" : ""} href="/">Discover</Link>
+          <Link className={activePath === "/feed" ? "nav-active" : ""} href="/feed">Feed</Link>
           <Link className={activePath === "/following" ? "nav-active" : ""} href="/following">Following</Link>
         </nav>
         <div className="top-actions">
@@ -65,7 +81,7 @@ export function TopBar({ activePath = "/" }: { activePath?: string }) {
                 <div className="profile-menu-divider" />
                 <span className="profile-menu-label">YOUR SPACE</span>
                 <Link href="/profilePage">◉ <span>Profile</span></Link>
-                <Link href="/savedPage">♡ <span>Saved rooms</span></Link>
+                <Link href="/savedPage">♡ <span>Saved posts</span></Link>
                 <Link href="/historyPage">◷ <span>Listening history</span></Link>
                 <Link href="/settingsPage">⚙ <span>Settings</span></Link>
                 <Link href="/loginPage">↪ <span>Sign in</span></Link>

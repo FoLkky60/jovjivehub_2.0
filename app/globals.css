@@ -8,6 +8,8 @@
   --coral: #ec765a;
   --cream: #fbfaf8;
   --lavender: #f2eff8;
+  --motion-fast: 180ms;
+  --motion-medium: 260ms;
 }
 
 * {
@@ -281,6 +283,100 @@ button {
   color: #9d9497;
   font-size: 11px;
   line-height: 1.6;
+}
+
+.share-modal {
+  position: relative;
+  width: min(100%, 520px);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 22px 70px #362c3b2e;
+}
+
+.share-modal h2 {
+  margin: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 19px 24px;
+  color: #312d32;
+  font-size: 19px;
+  text-align: center;
+}
+
+.share-modal .modal-close {
+  top: 12px;
+  right: 14px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #edf0f3;
+  color: #252b31;
+  font-size: 23px;
+}
+
+.share-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 24px 8px;
+}
+
+.share-author div {
+  display: grid;
+  gap: 4px;
+}
+
+.share-author strong {
+  color: #252329;
+  font-size: 12px;
+}
+
+.share-author span:not(.feed-avatar) {
+  color: #888186;
+  font-size: 10px;
+}
+
+.share-modal > textarea {
+  width: calc(100% - 48px);
+  margin: 8px 24px 14px;
+  border: 0;
+  outline: 0;
+  color: #605960;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.share-modal > textarea::placeholder {
+  color: #969094;
+}
+
+.share-preview {
+  margin: 0 24px 20px;
+  border: 1px solid #e1e5e8;
+  border-radius: 9px;
+  padding: 13px;
+  background: #fafafa;
+}
+
+.share-preview strong {
+  color: #514a51;
+  font-size: 11px;
+}
+
+.share-preview p {
+  margin: 7px 0 9px;
+  color: #746d73;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.share-preview span {
+  color: #a19a9e;
+  font: 9px "DM Mono", monospace;
+}
+
+.share-submit {
+  display: block;
+  margin: 0 24px 16px auto;
 }
 
 .search-suggestions {
@@ -651,13 +747,40 @@ button {
   margin-top: 8px;
 }
 
+.room-detail-actions {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+}
+
+.room-exit-button {
+  border: 1px solid #e2dcd9;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: #fff;
+  color: #7e757a;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.room-exit-button:hover {
+  border-color: #d7aaa0;
+  color: var(--coral);
+}
+
+.room-exit-button.owner {
+  border-color: #efc4b9;
+  background: #fff7f4;
+  color: var(--coral);
+}
+
 .room-options-wrap {
   position: relative;
 }
 
 .room-options {
   position: absolute;
-  top: 34px;
+  top: 45px;
   right: 0;
   z-index: 8;
   width: 165px;
@@ -1086,6 +1209,370 @@ button {
   font-size: 9px;
 }
 
+.feed-page {
+  width: min(100% - 44px, 680px);
+  margin: 0 auto;
+  padding: 54px 0 80px;
+}
+
+.feed-intro {
+  margin-bottom: 28px;
+}
+
+.feed-intro h1 {
+  margin: 10px 0 7px;
+  color: #413a43;
+  font-size: 32px;
+  letter-spacing: -1.4px;
+}
+
+.feed-intro p {
+  margin: 0;
+  color: #9d9497;
+  font-size: 12px;
+}
+
+.post-composer,
+.feed-post {
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #fffdfc;
+  box-shadow: 0 10px 28px #362c3b0a;
+}
+
+.post-composer {
+  padding: 18px;
+  margin-bottom: 24px;
+}
+
+.composer-top {
+  display: flex;
+  gap: 12px;
+}
+
+.feed-avatar {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ec765a;
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.composer-top textarea {
+  width: 100%;
+  min-height: 74px;
+  border: 0;
+  outline: 0;
+  padding: 7px 0;
+  color: var(--ink);
+  font-size: 12px;
+  resize: vertical;
+}
+
+.composer-top textarea::placeholder {
+  color: #b3abad;
+}
+
+.composer-preview {
+  position: relative;
+  overflow: hidden;
+  margin: 13px 0 0 48px;
+  border-radius: 9px;
+  background: #f1ecea;
+}
+
+.composer-preview img,
+.composer-preview video {
+  display: block;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.composer-preview button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: #29262dcc;
+  color: white;
+  font-size: 18px;
+}
+
+.composer-actions,
+.feed-post-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.composer-actions {
+  margin: 14px 0 0 48px;
+}
+
+.composer-actions button,
+.feed-post-actions button {
+  border: 0;
+  background: transparent;
+  color: #8f878b;
+  font-size: 11px;
+}
+
+.composer-actions button:first-of-type {
+  padding: 7px 0;
+}
+
+.composer-actions button:not(.composer-publish) {
+  padding: 7px 3px;
+  color: #766f74;
+}
+
+.composer-actions button:not(.composer-publish) + button:not(.composer-publish) {
+  margin-left: 4px;
+}
+
+.composer-publish {
+  margin-left: auto;
+  border-radius: 7px !important;
+  padding: 9px 14px;
+  background: var(--coral) !important;
+  color: white !important;
+  font-weight: 800;
+}
+
+.feed-list,
+.saved-post-list,
+.profile-post-list {
+  display: grid;
+  gap: 18px;
+}
+
+.feed-post {
+  padding: 19px;
+}
+
+.feed-post-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feed-post-header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.feed-post-header strong {
+  color: #514a51;
+  font-size: 12px;
+}
+
+.feed-post-header span:not(.feed-avatar) {
+  color: #a49c9f;
+  font: 9px "DM Mono", monospace;
+}
+
+.feed-more {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #aaa1a4;
+  letter-spacing: 2px;
+}
+
+.feed-post-menu {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  z-index: 4;
+  display: grid;
+  min-width: 125px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 24px #362c3b1c;
+}
+
+.feed-post-menu button {
+  border: 0;
+  border-radius: 5px;
+  padding: 8px 9px;
+  background: transparent;
+  color: #716970;
+  font-size: 11px;
+  text-align: left;
+}
+
+.feed-post-menu button:hover {
+  background: #f7f2ef;
+  color: var(--coral);
+}
+
+.feed-post-menu button.danger:hover {
+  color: #c65757;
+}
+
+.feed-edit-form {
+  margin: 17px 0;
+}
+
+.feed-edit-form textarea {
+  width: 100%;
+  border: 1px solid #e3ddda;
+  border-radius: 8px;
+  outline: 0;
+  padding: 11px;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.feed-edit-form textarea:focus {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px #ec765a1c;
+}
+
+.feed-edit-form > div {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.feed-edit-form button {
+  border: 1px solid #e2dcd9;
+  border-radius: 7px;
+  padding: 8px 11px;
+  background: white;
+  color: #817980;
+  font-size: 10px;
+}
+
+.feed-edit-form .feed-edit-save {
+  border-color: var(--coral);
+  background: var(--coral);
+  color: white;
+}
+
+.feed-post-text {
+  margin: 17px 0;
+  color: #625b62;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.feed-media {
+  position: relative;
+  width: 100%;
+  height: 310px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #f1ecea;
+  object-fit: cover;
+}
+
+.feed-media img {
+  object-fit: cover;
+}
+
+.feed-post-actions {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #f0ecea;
+}
+
+.feed-post-actions button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+}
+
+.feed-post-actions button:first-child {
+  color: #a29a9e;
+}
+
+.feed-post-actions button.active {
+  color: var(--coral);
+}
+
+.feed-post-actions button span {
+  font-size: 10px;
+}
+
+.feed-comments {
+  display: grid;
+  gap: 12px;
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 1px solid #f0ecea;
+}
+
+.feed-comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.feed-comment-avatar {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  border-radius: 50%;
+  background: #eee8e5;
+  color: #817980;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.feed-comment p {
+  margin: 2px 0 0;
+  color: #817980;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.feed-comment p strong {
+  margin-right: 6px;
+  color: #5e575e;
+}
+
+.feed-comment-form {
+  display: flex;
+  gap: 8px;
+  border: 1px solid #e8e1df;
+  border-radius: 7px;
+  padding: 6px 8px 6px 11px;
+}
+
+.feed-comment-form input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  font-size: 10px;
+}
+
+.feed-comment-form button {
+  border: 0;
+  background: transparent;
+  color: var(--coral);
+}
+
 .mobile-chat {
   display: none;
 }
@@ -1210,8 +1697,46 @@ button {
 }
 
 @media (max-width: 460px) {
+  .feed-page {
+    width: min(100% - 28px, 680px);
+    padding-top: 34px;
+  }
+
+  .feed-intro h1 {
+    font-size: 27px;
+  }
+
+  .feed-post,
+  .post-composer {
+    padding: 14px;
+  }
+
+  .composer-preview,
+  .composer-actions {
+    margin-left: 48px;
+  }
+
+  .feed-media {
+    height: 230px;
+  }
+
+  .share-modal {
+    align-self: end;
+    margin-bottom: 0;
+    border-radius: 14px 14px 0 0;
+  }
+
   .content-header h1 {
     font-size: 25px;
+  }
+
+  .room-detail-actions {
+    gap: 4px;
+  }
+
+  .room-exit-button {
+    padding: 8px 7px;
+    font-size: 10px;
   }
 
   .live-stage {
@@ -1910,6 +2435,34 @@ button {
   transform: translateX(18px);
 }
 
+button,
+a,
+input,
+textarea,
+select {
+  transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease, border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease, transform var(--motion-fast) ease, opacity var(--motion-fast) ease;
+}
+
+button:hover:not(:disabled),
+a:hover {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled),
+a:active {
+  transform: translateY(0);
+  transition-duration: 90ms;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #ec765a88;
+  outline-offset: 2px;
+}
+
 @media (max-width: 700px) {
   .home-content,
   .account-content {
@@ -2395,4 +2948,82 @@ button {
   .auth-form-panel {
     padding: 45px 22px 70px;
   }
+}
+
+/* Improve readability for compact metadata and controls. */
+.topnav a,
+.new-room,
+.profile-menu a {
+  font-size: 14px;
+}
+
+.topnav a {
+  font-size: 16px;
+}
+
+.manage-profile,
+.message p,
+.chat-composer input,
+.feed-post-text,
+.share-modal > textarea {
+  font-size: 13px;
+}
+
+.eyebrow,
+.section-kicker,
+.room-copy small,
+.host-note,
+.conversation-heading span,
+.message-meta time,
+.chat-tip,
+.feed-post-header span:not(.feed-avatar),
+.feed-comment-avatar,
+.share-preview span {
+  font-size: 11px;
+}
+
+.room-result-count,
+.people-copy,
+.chat-online,
+.message-meta strong,
+.feed-post-actions button,
+.composer-actions button,
+.feed-comment p,
+.feed-comment-form input,
+.share-author span:not(.feed-avatar),
+.modal-label,
+.auth-switch {
+  font-size: 12px;
+}
+
+.room-live {
+  font-size: 10px;
+}
+
+.see-all,
+.modal-description,
+.modal-label input,
+.modal-label select,
+.modal-label textarea,
+.modal-primary,
+.modal-secondary,
+.auth-description {
+  font-size: 13px;
+}
+
+.feed-intro p,
+.composer-top textarea,
+.feed-post-header strong,
+.share-author strong {
+  font-size: 14px;
+}
+
+.share-preview strong,
+.share-preview p {
+  font-size: 13px;
+}
+
+.feed-avatar,
+.feed-comment-form button {
+  font-size: 14px;
 }

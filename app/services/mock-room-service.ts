@@ -5,6 +5,16 @@ export function getMockRooms(): Room[] {
   return [...mockRooms];
 }
 
+export function addMockRoom(room: Room): Room {
+  mockRooms.unshift(room);
+  return room;
+}
+
+export function closeMockRoom(roomId: number): void {
+  const roomIndex = mockRooms.findIndex((room) => room.id === roomId);
+  if (roomIndex >= 0) mockRooms.splice(roomIndex, 1);
+}
+
 export function getMockMessages(): ChatMessage[] {
   return [...mockMessages];
 }

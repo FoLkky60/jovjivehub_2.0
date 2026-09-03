@@ -8,13 +8,15 @@ import { MessageItem } from "@/app/component/MessageItem";
 import { PeopleRow } from "@/app/component/PeopleRow";
 import { Sidebar } from "@/app/component/Sidebar";
 import { TopBar } from "@/app/component/TopBar";
-import { createMockMessage, getMockMessages, getMockRooms } from "@/app/services/mock-room-service";
+import { closeMockRoom, createMockMessage, getMockMessages, getMockRooms } from "@/app/services/mock-room-service";
 import { Room } from "@/app/types/room";
+import { Icon } from "@iconify/react";
 
 export function RoomDetailPage({ roomId }: { roomId: number }) {
   const router = useRouter();
   const rooms = getMockRooms();
   const activeRoom = rooms.find((room) => room.id === roomId) ?? rooms[0];
+  const isOwner = activeRoom.host === "jovjive_user";
   const [messages, setMessages] = useState(getMockMessages);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
@@ -24,6 +26,11 @@ export function RoomDetailPage({ roomId }: { roomId: number }) {
 
   function selectRoom(room: Room) {
     router.push(`/roomPage/${room.id}`);
+  }
+
+  function leaveRoom() {
+    if (isOwner) closeMockRoom(activeRoom.id);
+    router.push("/");
   }
 
   return (
@@ -38,9 +45,14 @@ export function RoomDetailPage({ roomId }: { roomId: number }) {
               <h1>{activeRoom.title}</h1>
               <p>Hosted by <strong>@{activeRoom.host}</strong> <span className="verified">✓</span></p>
             </div>
-            <div className="room-options-wrap">
-              <button className="more-button" aria-label="More options" onClick={() => setIsOptionsOpen(!isOptionsOpen)}>•••</button>
-              {isOptionsOpen && <div className="room-options"><button onClick={() => setIsOptionsOpen(false)}>♡ Save room</button><button onClick={() => navigator.clipboard?.writeText(window.location.href)}>↗ Copy room link</button><button onClick={() => setIsOptionsOpen(false)}>⚑ Report room</button></div>}
+            <div className="room-detail-actions">
+              <button className={`room-exit-button ${isOwner ? "owner" : ""}`} onClick={leaveRoom}>{isOwner ? "Close room" : "Leave room"}</button>
+              <div className="room-options-wrap">
+              <button className="more-button" aria-label="More options" onClick={() => setIsOptionsOpen(!isOptionsOpen)}>
+                <Icon icon="mdi:dots-horizontal" />
+              </button>
+              {isOptionsOpen && <div className="room-options"><button onClick={() => navigator.clipboard?.writeText(window.location.href)}>↗ Copy room link</button><button onClick={() => setIsOptionsOpen(false)}>⚑ Report room</button></div>}
+              </div>
             </div>
           </div>
           <LiveStage key={activeRoom.id} room={activeRoom} />

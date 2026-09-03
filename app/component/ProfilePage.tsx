@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { TopBar } from "@/app/component/TopBar";
-import { getMockRooms } from "@/app/services/mock-room-service";
-import { RoomCard } from "@/app/component/RoomCard";
+import { FeedPostCard } from "@/app/component/FeedPostCard";
+import { getFeedPosts } from "@/app/services/mock-feed-service";
 
 export function ProfilePage() {
   const [displayName, setDisplayName] = useState("Jovjive listener");
   const [username, setUsername] = useState("jovjive_user");
   const [bio, setBio] = useState("Here for good conversations.");
   const [isEditing, setIsEditing] = useState(false);
-  const rooms = getMockRooms().slice(0, 2);
+  const profilePosts = getFeedPosts().filter((post) => post.authorUsername === username || post.sharedByMe);
 
   return (
     <div className="app-shell">
@@ -29,7 +29,7 @@ export function ProfilePage() {
           <button className="profile-edit-button" onClick={() => setIsEditing(true)}>Edit profile</button>
         </section>
         <div className="profile-stats"><span><strong>12</strong> rooms joined</span><span><strong>2</strong> following</span><span><strong>18</strong> conversations</span></div>
-        <section className="profile-rooms"><div className="section-title-row"><div><span className="section-kicker">YOUR ROOMS</span><h2>Rooms you opened</h2></div></div><div className="account-room-grid">{rooms.map((room) => <RoomCard key={room.id} room={room} />)}</div></section>
+        <section className="profile-rooms"><div className="section-title-row"><div><span className="section-kicker">YOUR ACTIVITY</span><h2>Posts you shared</h2></div></div><div className="profile-post-list">{profilePosts.map((post) => <FeedPostCard key={post.id} initialPost={post} />)}</div></section>
       </main>
       {isEditing && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setIsEditing(false)}><section className="room-modal" role="dialog" aria-modal="true" aria-labelledby="profile-page-edit-title"><button className="modal-close" onClick={() => setIsEditing(false)} aria-label="Close edit profile">×</button><span className="section-kicker">YOUR IDENTITY</span><h2 id="profile-page-edit-title">Edit profile</h2><label className="modal-label">Display name<input value={displayName} onChange={(event) => setDisplayName(event.target.value)} /></label><label className="modal-label">Username<input value={username} onChange={(event) => setUsername(event.target.value.replace(/\s/g, ""))} /></label><label className="modal-label">Bio<textarea rows={3} value={bio} onChange={(event) => setBio(event.target.value)} /></label><div className="modal-actions"><button className="modal-secondary" onClick={() => setIsEditing(false)}>Cancel</button><button className="modal-primary" onClick={() => setIsEditing(false)}>Save profile</button></div></section></div>}
     </div>
