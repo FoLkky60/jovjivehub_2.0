@@ -14,14 +14,15 @@ export function Sidebar({
   onSelect: (room: Room) => void;
 }) {
   const router = useRouter();
+  const liveRooms = [...rooms].sort((first, second) => Number(second.listeners) - Number(first.listeners)).slice(0, 6);
 
   return (
     <aside className="sidebar">
       <div className="side-heading">
         <span>LIVE NOW</span>
-        <span className="live-count">12 rooms</span>
+        <span className="live-count">{rooms.length} rooms</span>
       </div>
-      <RoomList rooms={rooms} activeRoomId={activeRoomId} onSelect={onSelect} />
+      <RoomList rooms={liveRooms} activeRoomId={activeRoomId} onSelect={onSelect} />
       <button
         className="see-all"
         onClick={() => router.push("/")}

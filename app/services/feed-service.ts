@@ -1,7 +1,9 @@
 import { getDatabase } from "@/app/lib/mongodb";
 import { FeedPost } from "@/app/types/feed";
+import { randomUUID } from "node:crypto";
+import { ObjectId } from "mongodb";
 
-type FeedDocument = FeedPost & { _id?: string; createdAtDate: Date };
+type FeedDocument = FeedPost & { _id?: ObjectId; createdAtDate: Date };
 
 async function getCollection() {
   return (await getDatabase()).collection<FeedDocument>("feedPosts");
@@ -16,13 +18,25 @@ function withoutDatabaseFields(post: FeedDocument): FeedPost {
 
 export async function listFeedPosts() {
   const collection = await getCollection();
-  const posts = await collection.find({}, { projection: { _id: 0, createdAtDate: 0 } }).sort({ createdAtDate: -1 }).toArray();
-  return posts as FeedPost[];
+  const documents = await collection.find({}).sort({ createdAtDate: -1, _id: -1 }).toArray();
+  const seen = new Set<string>();
+  const duplicateIds: ObjectId[] = [];
+  const posts = documents.filter((post) => {
+    if (seen.has(post.id)) {
+      if (post._id) duplicateIds.push(post._id);
+      return false;
+    }
+    seen.add(post.id);
+    return true;
+  });
+  if (duplicateIds.length > 0) await collection.deleteMany({ _id: { $in: duplicateIds } });
+  await collection.createIndex({ id: 1 }, { unique: true }).catch(() => undefined);
+  return posts.map(withoutDatabaseFields);
 }
 
 export async function insertFeedPost(post: Omit<FeedPost, "id" | "createdAt">) {
   const collection = await getCollection();
-  const document: FeedDocument = { ...post, id: `post-${Date.now()}`, createdAt: "just now", createdAtDate: new Date() };
+  const document: FeedDocument = { ...post, id: `post-${randomUUID()}`, createdAt: "just now", createdAtDate: new Date() };
   await collection.insertOne(document);
   return withoutDatabaseFields(document);
 }

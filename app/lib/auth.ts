@@ -22,7 +22,7 @@ export async function verifyPassword(password: string, storedPassword: string) {
 type UserDocument = UserProfile & { passwordHash: string; createdAt: Date };
 
 export async function getCurrentUser(request: Request): Promise<UserProfile | null> {
-  const sessionId = request.headers.get("cookie")?.match(/(?:^|;\s*)jovjive_session=([^;]+)/)?.[1];
+  const sessionId = getSessionId(request);
   if (!sessionId) return null;
   const database = await getDatabase();
   const session = await database.collection<{ sessionId: string; email: string; expiresAt: Date }>("sessions").findOne({ sessionId, expiresAt: { $gt: new Date() } });
@@ -36,4 +36,8 @@ export async function getCurrentUser(request: Request): Promise<UserProfile | nu
     bio: user.bio || "",
     avatar: user.avatar || "#d9795f",
   };
+}
+
+export function getSessionId(request: Request) {
+  return request.headers.get("cookie")?.match(/(?:^|;\s*)jovjive_session=([^;]+)/)?.[1] ?? null;
 }

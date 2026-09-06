@@ -6,7 +6,13 @@ type MessageDocument = ChatMessage & { _id?: string; roomId: number; createdAt: 
 
 export async function listRooms(): Promise<Room[]> {
   const rooms = (await getDatabase()).collection<RoomDocument>("rooms");
-  return rooms.find({}, { projection: { _id: 0 } }).sort({ createdAt: -1 }).toArray();
+  const database = await getDatabase();
+  const result = await rooms.find({}, { projection: { _id: 0 } }).sort({ createdAt: -1 }).toArray();
+  const activeSince = new Date(Date.now() - 30_000);
+  return Promise.all(result.map(async (room) => ({
+    ...room,
+    listeners: String(await database.collection("roomPresence").countDocuments({ roomId: room.id, lastSeen: { $gte: activeSince } })),
+  })));
 }
 
 export async function createRoom(room: Omit<Room, "id">): Promise<Room> {

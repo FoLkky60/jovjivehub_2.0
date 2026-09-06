@@ -7,9 +7,11 @@ import { MessageItem } from "@/app/component/MessageItem";
 export function ChatPanel({
   messages,
   onSend,
+  onlineCount,
 }: {
   messages: ChatMessage[];
   onSend: (text: string) => void;
+  onlineCount: number;
 }) {
   const [message, setMessage] = useState("");
   function submit(event: SubmitEvent<HTMLFormElement>) {
@@ -24,7 +26,7 @@ export function ChatPanel({
       <div className="chat-heading">
         <h2>Chat</h2>
         <span className="chat-online">
-          <span className="status-dot"></span> 1,284
+          <span className="status-dot"></span> {onlineCount}
         </span>
       </div>
       <div className="chat-messages">

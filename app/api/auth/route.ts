@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { hashPassword, verifyPassword } from "@/app/lib/auth";
+import { getSessionId, hashPassword, verifyPassword } from "@/app/lib/auth";
 import { getDatabase } from "@/app/lib/mongodb";
 
 export const runtime = "nodejs";
@@ -43,7 +43,9 @@ export async function POST(request: Request) {
   return response;
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
+  const sessionId = getSessionId(request);
+  if (sessionId) await (await getDatabase()).collection("sessions").deleteOne({ sessionId });
   const response = NextResponse.json({ ok: true });
   response.cookies.delete("jovjive_session");
   return response;

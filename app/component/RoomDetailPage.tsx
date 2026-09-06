@@ -9,19 +9,34 @@ import { PeopleRow } from "@/app/component/PeopleRow";
 import { Sidebar } from "@/app/component/Sidebar";
 import { TopBar } from "@/app/component/TopBar";
 import { Room } from "@/app/types/room";
+import { ChatMessage } from "@/app/types/room";
+import { PresencePerson } from "@/app/types/presence";
+import { UserProfile } from "@/app/types/user";
 import { Icon } from "@iconify/react";
 
 export function RoomDetailPage({ roomId }: { roomId: number }) {
   const router = useRouter();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [messages, setMessages] = useState<import("@/app/types/room").ChatMessage[]>([]);
+  const [people, setPeople] = useState<PresencePerson[]>([]);
+  const [isJoined, setIsJoined] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserProfile>();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const activeRoom = rooms.find((room) => room.id === roomId);
-  const isOwner = activeRoom?.host === "jovjive_user";
+  const isOwner = activeRoom?.host === currentUser?.username;
 
   useEffect(() => {
     fetch("/api/rooms", { cache: "no-store" }).then((response) => response.json()).then((data: { rooms?: Room[] }) => setRooms(data.rooms ?? []));
-    fetch(`/api/rooms/${roomId}/messages`, { cache: "no-store" }).then((response) => response.json()).then((data: { messages?: import("@/app/types/room").ChatMessage[] }) => setMessages(data.messages ?? []));
+    fetch("/api/profile", { cache: "no-store" }).then((response) => response.json()).then((data: { user?: UserProfile }) => setCurrentUser(data.user));
+    const refreshMessages = () => fetch(`/api/rooms/${roomId}/messages`, { cache: "no-store" }).then((response) => response.json()).then((data: { messages?: ChatMessage[] }) => setMessages((current) => Array.from(new Map([...(data.messages ?? []), ...current].map((message) => [message.id, message])).values())));
+    const refreshPeople = () => fetch(`/api/rooms/${roomId}/presence`, { cache: "no-store" }).then((response) => response.json()).then((data: { people?: PresencePerson[] }) => setPeople(data.people ?? []));
+    fetch(`/api/rooms/${roomId}/presence`, { method: "POST" }).then((response) => response.json()).then((data: { people?: PresencePerson[] }) => { setIsJoined(true); setPeople(data.people ?? []); });
+    refreshMessages();
+    const messageStream = new EventSource(`/api/rooms/${roomId}/messages/stream`);
+    messageStream.onmessage = (event) => setMessages(JSON.parse(event.data) as ChatMessage[]);
+    const presenceTimer = window.setInterval(() => { fetch(`/api/rooms/${roomId}/presence`, { method: "POST" }).then((response) => response.json()).then((data: { people?: PresencePerson[] }) => setPeople(data.people ?? [])); }, 10000);
+    const peopleTimer = window.setInterval(refreshPeople, 3000);
+    return () => { messageStream.close(); window.clearInterval(presenceTimer); window.clearInterval(peopleTimer); void fetch(`/api/rooms/${roomId}/presence`, { method: "DELETE" }); };
   }, [roomId]);
 
   async function sendMessage(text: string) {
@@ -42,6 +57,11 @@ export function RoomDetailPage({ roomId }: { roomId: number }) {
     } else {
       router.push("/");
     }
+  }
+
+  function toggleJoin() {
+    const method = isJoined ? "DELETE" : "POST";
+    fetch(`/api/rooms/${roomId}/presence`, { method }).then((response) => response.json()).then((data: { people?: PresencePerson[] }) => { setIsJoined(!isJoined); setPeople(data.people ?? []); });
   }
 
   if (!activeRoom) return <div className="app-shell"><TopBar activePath="/" /><main className="main-content"><p>Loading room...</p></main></div>;
@@ -68,12 +88,12 @@ export function RoomDetailPage({ roomId }: { roomId: number }) {
               </div>
             </div>
           </div>
-          <LiveStage key={activeRoom.id} room={activeRoom} />
-          <PeopleRow />
+          <LiveStage key={activeRoom.id} room={activeRoom} people={people} isJoined={isJoined} onToggleJoin={toggleJoin} />
+          <PeopleRow people={people} />
           <div className="conversation-heading"><h2>Conversation</h2><span>Newest first</span></div>
           <div className="mobile-chat">{messages.slice(-3).map((item) => <MessageItem key={item.id} message={item} />)}</div>
         </main>
-        <ChatPanel messages={messages} onSend={sendMessage} />
+        <ChatPanel messages={messages} onSend={sendMessage} onlineCount={people.length} />
       </div>
     </div>
   );

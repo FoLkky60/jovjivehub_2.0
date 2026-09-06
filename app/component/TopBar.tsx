@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { SubmitEvent, useEffect, useState } from "react";
 import { Room } from "@/app/types/room";
 import { UserProfile } from "@/app/types/user";
 
 export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: string; onRoomCreated?: (room: Room) => void }) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -18,11 +20,19 @@ export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: strin
   const [bio, setBio] = useState("");
 
   useEffect(() => {
-    fetch("/api/profile", { cache: "no-store" }).then((response) => response.json()).then((data: { user?: UserProfile }) => {
-      if (!data.user) return;
+    fetch("/api/profile", { cache: "no-store" }).then((response) => response.ok ? response.json() : {}).then((data: { user?: UserProfile }) => {
+      if (!data.user) { setProfile(undefined); return; }
       setProfile(data.user); setDisplayName(data.user.name); setUsername(data.user.username); setBio(data.user.bio);
     });
   }, []);
+
+  async function logout() {
+    await fetch("/api/auth", { method: "DELETE" });
+    setProfile(undefined);
+    setIsProfileOpen(false);
+    router.push("/loginPage");
+    router.refresh();
+  }
 
   async function saveProfile() {
     const response = await fetch("/api/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: displayName, username, bio, avatar: profile?.avatar }) });
@@ -95,11 +105,12 @@ export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: strin
                 <Link href="/savedPage">♡ <span>Saved posts</span></Link>
                 <Link href="/historyPage">◷ <span>Listening history</span></Link>
                 <Link href="/settingsPage">⚙ <span>Settings</span></Link>
-                <Link href="/loginPage">↪ <span>Sign in</span></Link>
-                <Link href="/registerPage">＋ <span>Create account</span></Link>
-                <button className="manage-profile" onClick={openProfileModal}>
-                  Manage profile <span>→</span>
-                </button>
+                {profile ? <>
+                  <button className="manage-profile" onClick={logout}>↪ <span>Logout</span></button>
+                </> : <>
+                  <Link href="/loginPage">↪ <span>Sign in</span></Link>
+                  <Link href="/registerPage">＋ <span>Create account</span></Link>
+                </>}
               </div>
             )}
           </div>
