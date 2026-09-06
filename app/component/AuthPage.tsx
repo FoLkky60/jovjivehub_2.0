@@ -12,9 +12,15 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   const [password, setPassword] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  function submit(event: SubmitEvent<HTMLFormElement>) {
+  async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!email.trim() || !password.trim() || (isRegister && !name.trim())) return;
+    const response = await fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode, name, email, password }),
+    });
+    if (!response.ok) return;
     setIsSubmitted(true);
   }
 
@@ -28,7 +34,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       <section className="auth-form-panel">
         <div className="auth-form-wrap">
           {isSubmitted ? (
-            <div className="auth-success"><span className="success-mark">✓</span><span className="section-kicker">WELCOME TO JOVJIVEHUB</span><h2>{isRegister ? "Your account is ready" : "You are signed in"}</h2><p>This is a mock authentication flow. Your session is ready to explore.</p><Link className="modal-primary auth-submit" href="/">Enter Jovjivehub ↗</Link></div>
+            <div className="auth-success"><span className="success-mark">✓</span><span className="section-kicker">WELCOME TO JOVJIVEHUB</span><h2>{isRegister ? "Your account is ready" : "You are signed in"}</h2><p>Your session is ready to explore.</p><Link className="modal-primary auth-submit" href="/">Enter Jovjivehub ↗</Link></div>
           ) : (
             <>
               <span className="section-kicker">{isRegister ? "JOIN THE CONVERSATION" : "WELCOME BACK"}</span>

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { SubmitEvent, useState } from "react";
-import { addMockRoom } from "@/app/services/mock-room-service";
+import { SubmitEvent, useEffect, useState } from "react";
 import { Room } from "@/app/types/room";
+import { UserProfile } from "@/app/types/user";
 
 export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: string; onRoomCreated?: (room: Room) => void }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,9 +12,25 @@ export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: strin
   const [roomTitle, setRoomTitle] = useState("");
   const [topic, setTopic] = useState("Life & feelings");
   const [created, setCreated] = useState(false);
-  const [displayName, setDisplayName] = useState("Jovjive listener");
-  const [username, setUsername] = useState("jovjive_user");
-  const [bio, setBio] = useState("Here for good conversations.");
+  const [profile, setProfile] = useState<UserProfile>();
+  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+
+  useEffect(() => {
+    fetch("/api/profile", { cache: "no-store" }).then((response) => response.json()).then((data: { user?: UserProfile }) => {
+      if (!data.user) return;
+      setProfile(data.user); setDisplayName(data.user.name); setUsername(data.user.username); setBio(data.user.bio);
+    });
+  }, []);
+
+  async function saveProfile() {
+    const response = await fetch("/api/profile", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: displayName, username, bio, avatar: profile?.avatar }) });
+    if (response.ok) {
+      const data = await response.json() as { user: UserProfile };
+      setProfile(data.user); setDisplayName(data.user.name); setUsername(data.user.username); setBio(data.user.bio); setIsProfileModalOpen(false);
+    }
+  }
 
   function closeModal() {
     setIsOpen(false);
@@ -22,22 +38,17 @@ export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: strin
     setRoomTitle("");
   }
 
-  function createRoom(event: SubmitEvent<HTMLFormElement>) {
+  async function createRoom(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!roomTitle.trim()) return;
-    const room = {
-      id: Date.now(),
-      title: roomTitle.trim(),
-      host: "jovjive_user",
-      topic,
-      listeners: "1",
-      color: "#f4b650",
-      initials: roomTitle.trim().charAt(0).toUpperCase(),
-      avatar: "#d9795f",
-      location: { name: "Online", city: "Online", latitude: 0, longitude: 0 },
-    } satisfies Room;
-    addMockRoom(room);
-    onRoomCreated?.(room);
+    const response = await fetch("/api/rooms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: roomTitle.trim(), topic }),
+    });
+    if (!response.ok) return;
+    const data = await response.json() as { room: Room };
+    onRoomCreated?.(data.room);
     setCreated(true);
   }
 
@@ -67,15 +78,15 @@ export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: strin
               aria-label="Open profile menu"
               aria-expanded={isProfileOpen}
             >
-              J
+              {profile?.name?.[0]?.toUpperCase() ?? "U"}
             </button>
             {isProfileOpen && (
               <div className="profile-menu">
                 <div className="profile-menu-header">
-                  <span className="profile-menu-avatar">J</span>
+                  <span className="profile-menu-avatar">{profile?.name?.[0]?.toUpperCase() ?? "U"}</span>
                   <div>
-                    <strong>{displayName}</strong>
-                    <small>@{username}</small>
+                    <strong>{profile?.name ?? "Loading..."}</strong>
+                    <small>@{profile?.username ?? ""}</small>
                   </div>
                 </div>
                 <div className="profile-menu-divider" />
@@ -100,7 +111,7 @@ export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: strin
           <section className="room-modal" role="dialog" aria-modal="true" aria-labelledby="room-modal-title">
             <button className="modal-close" onClick={closeModal} aria-label="Close room form">×</button>
             {created ? (
-              <div className="modal-success"><span className="success-mark">✓</span><h2>Your room is ready</h2><p>Mock room created. Invite people in and start the conversation.</p><button className="modal-primary" onClick={closeModal}>Done</button></div>
+              <div className="modal-success"><span className="success-mark">✓</span><h2>Your room is ready</h2><p>Your room is live. Invite people in and start the conversation.</p><button className="modal-primary" onClick={closeModal}>Done</button></div>
             ) : (
               <form onSubmit={createRoom}>
                 <span className="section-kicker">START SOMETHING NEW</span>
@@ -127,7 +138,7 @@ export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: strin
             <h2 id="profile-modal-title">Manage profile</h2>
             <p className="modal-description">Tell the room a little about the person behind the voice.</p>
             <div className="profile-edit-avatar">
-              J
+              {profile?.name?.[0]?.toUpperCase() ?? "U"}
               <button aria-label="Change profile image">＋</button>
             </div>
             <label className="modal-label">Display name<input value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={40} /></label>
@@ -135,7 +146,7 @@ export function TopBar({ activePath = "/", onRoomCreated }: { activePath?: strin
             <label className="modal-label">Bio<textarea value={bio} onChange={(event) => setBio(event.target.value)} maxLength={120} rows={3} /></label>
             <div className="modal-actions">
               <button className="modal-secondary" onClick={() => setIsProfileModalOpen(false)}>Cancel</button>
-              <button className="modal-primary" onClick={() => setIsProfileModalOpen(false)}>Save profile</button>
+              <button className="modal-primary" onClick={saveProfile}>Save profile</button>
             </div>
           </section>
         </div>

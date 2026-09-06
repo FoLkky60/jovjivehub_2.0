@@ -1,13 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { RoomCard } from "@/app/component/RoomCard";
 import { TopBar } from "@/app/component/TopBar";
-import { getMockRooms } from "@/app/services/mock-room-service";
+import { Room } from "@/app/types/room";
 
 export function FollowingPage() {
-  const rooms = getMockRooms();
+  const [rooms, setRooms] = useState<Room[]>([]);
+  useEffect(() => { fetch("/api/rooms", { cache: "no-store" }).then((response) => response.json()).then((data: { rooms?: Room[] }) => setRooms(data.rooms ?? [])); }, []);
   const followedHosts = ["mewmew", "nana.wav"];
   const hostListRef = useRef<HTMLDivElement>(null);
   const followingRooms = rooms.filter((room) => followedHosts.includes(room.host));

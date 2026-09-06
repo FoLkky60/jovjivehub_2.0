@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChatPanel } from "@/app/component/ChatPanel";
 import { LiveStage } from "@/app/component/LiveStage";
@@ -8,20 +8,28 @@ import { MessageItem } from "@/app/component/MessageItem";
 import { PeopleRow } from "@/app/component/PeopleRow";
 import { Sidebar } from "@/app/component/Sidebar";
 import { TopBar } from "@/app/component/TopBar";
-import { closeMockRoom, createMockMessage, getMockMessages, getMockRooms } from "@/app/services/mock-room-service";
 import { Room } from "@/app/types/room";
 import { Icon } from "@iconify/react";
 
 export function RoomDetailPage({ roomId }: { roomId: number }) {
   const router = useRouter();
-  const rooms = getMockRooms();
-  const activeRoom = rooms.find((room) => room.id === roomId) ?? rooms[0];
-  const isOwner = activeRoom.host === "jovjive_user";
-  const [messages, setMessages] = useState(getMockMessages);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [messages, setMessages] = useState<import("@/app/types/room").ChatMessage[]>([]);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const activeRoom = rooms.find((room) => room.id === roomId);
+  const isOwner = activeRoom?.host === "jovjive_user";
 
-  function sendMessage(text: string) {
-    setMessages((currentMessages) => [...currentMessages, createMockMessage(text)]);
+  useEffect(() => {
+    fetch("/api/rooms", { cache: "no-store" }).then((response) => response.json()).then((data: { rooms?: Room[] }) => setRooms(data.rooms ?? []));
+    fetch(`/api/rooms/${roomId}/messages`, { cache: "no-store" }).then((response) => response.json()).then((data: { messages?: import("@/app/types/room").ChatMessage[] }) => setMessages(data.messages ?? []));
+  }, [roomId]);
+
+  async function sendMessage(text: string) {
+    const response = await fetch(`/api/rooms/${roomId}/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    if (response.ok) {
+      const data = await response.json() as { message: import("@/app/types/room").ChatMessage };
+      setMessages((currentMessages) => [...currentMessages, data.message]);
+    }
   }
 
   function selectRoom(room: Room) {
@@ -29,9 +37,14 @@ export function RoomDetailPage({ roomId }: { roomId: number }) {
   }
 
   function leaveRoom() {
-    if (isOwner) closeMockRoom(activeRoom.id);
-    router.push("/");
+    if (isOwner) {
+      fetch(`/api/rooms/${roomId}`, { method: "DELETE" }).then(() => router.push("/"));
+    } else {
+      router.push("/");
+    }
   }
+
+  if (!activeRoom) return <div className="app-shell"><TopBar activePath="/" /><main className="main-content"><p>Loading room...</p></main></div>;
 
   return (
     <div className="app-shell">

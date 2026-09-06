@@ -1,17 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RoomCard } from "@/app/component/RoomCard";
 import { TopBar } from "@/app/component/TopBar";
-import { getMockRooms } from "@/app/services/mock-room-service";
 import { Room } from "@/app/types/room";
 
 const topics = ["All rooms", "Life & feelings", "Music lounge", "Startup & work", "Movies"];
 
 export function HomeDashboardPage() {
-  const [rooms, setRooms] = useState<Room[]>(getMockRooms);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [activeTopic, setActiveTopic] = useState("All rooms");
   const [query, setQuery] = useState("");
+  useEffect(() => {
+    fetch("/api/rooms", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((data: { rooms?: Room[] }) => setRooms(data.rooms ?? []));
+  }, []);
   const visibleRooms = useMemo(
     () => rooms.filter((room) => {
       const matchesTopic = activeTopic === "All rooms" || room.topic === activeTopic;

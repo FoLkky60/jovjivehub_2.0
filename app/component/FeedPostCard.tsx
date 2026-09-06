@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { addPostComment, deleteFeedPost, togglePostLike, togglePostShare, updateFeedPost } from "@/app/services/mock-feed-service";
 import { FeedPost } from "@/app/types/feed";
 import { Icon } from "@iconify/react";
 
@@ -15,34 +14,37 @@ export function FeedPostCard({ initialPost, onPostChanged, onShare }: { initialP
     const [editText, setEditText] = useState(initialPost.text);
     const isOwner = post.authorUsername === "jovjive_user";
 
-    function updatePost(action: (postId: string) => FeedPost) {
-        const updatedPost = action(post.id);
-        setPost(updatedPost);
-        onPostChanged?.(updatedPost);
+    async function updatePost(action: "like" | "share") {
+        const response = await fetch(`/api/feed/${post.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action }) });
+        if (!response.ok) return;
+        const { post: updatedPost } = await response.json() as { post: FeedPost };
+        setPost(updatedPost); onPostChanged?.(updatedPost);
     }
 
-    function submitComment(event: React.SubmitEvent<HTMLFormElement>) {
+    async function submitComment(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!comment.trim()) return;
-        const updatedPost = addPostComment(post.id, comment.trim());
-        setPost(updatedPost);
-        onPostChanged?.(updatedPost);
+        const response = await fetch(`/api/feed/${post.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "comment", text: comment.trim() }) });
+        if (!response.ok) return;
+        const { post: updatedPost } = await response.json() as { post: FeedPost };
+        setPost(updatedPost); onPostChanged?.(updatedPost);
         setComment("");
         setCommentsOpen(true);
     }
 
-    function saveEdit() {
+    async function saveEdit() {
         if (!editText.trim()) return;
-        const updatedPost = updateFeedPost(post.id, editText.trim());
-        setPost(updatedPost);
-        onPostChanged?.(updatedPost);
+        const response = await fetch(`/api/feed/${post.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "edit", text: editText.trim() }) });
+        if (!response.ok) return;
+        const { post: updatedPost } = await response.json() as { post: FeedPost };
+        setPost(updatedPost); onPostChanged?.(updatedPost);
         setIsEditing(false);
         setIsMenuOpen(false);
     }
 
-    function removePost() {
+    async function removePost() {
         if (!window.confirm("Delete this post?")) return;
-        deleteFeedPost(post.id);
+        await fetch(`/api/feed/${post.id}`, { method: "DELETE" });
         onPostChanged?.({ ...post, id: "" });
     }
 
@@ -60,9 +62,9 @@ export function FeedPostCard({ initialPost, onPostChanged, onShare }: { initialP
             {post.mediaType === "image" && post.mediaUrl && <div className="feed-media"><Image src={post.mediaUrl} alt="Post media" fill sizes="(max-width: 700px) 100vw, 650px" unoptimized /></div>}
             {post.mediaType === "video" && post.mediaUrl && <video className="feed-media" controls preload="metadata" src={post.mediaUrl} />}
             <div className="feed-post-actions">
-                <button className={post.likedByMe ? "active" : ""} onClick={() => updatePost(togglePostLike)} aria-label="Like post">{post.likedByMe ? "♥" : "♡"} <span>{post.likes}</span></button>
+                <button className={post.likedByMe ? "active" : ""} onClick={() => updatePost("like")} aria-label="Like post">{post.likedByMe ? "♥" : "♡"} <span>{post.likes}</span></button>
                 <button className={commentsOpen ? "active" : ""} onClick={() => setCommentsOpen(!commentsOpen)} aria-label="Show comments">◌ <span>Comment {post.comments.length}</span></button>
-                <button className={post.sharedByMe ? "active" : ""} onClick={() => onShare ? onShare(post) : updatePost(togglePostShare)} aria-label="Share post">↗ <span>{post.sharedByMe ? "Shared" : "Share"}</span></button>
+                <button className={post.sharedByMe ? "active" : ""} onClick={() => onShare ? onShare(post) : updatePost("share")} aria-label="Share post">↗ <span>{post.sharedByMe ? "Shared" : "Share"}</span></button>
             </div>
             {commentsOpen && <div className="feed-comments">
                 {post.comments.map((item) => <div className="feed-comment" key={item.id}><span className="feed-comment-avatar">{item.author[0].toUpperCase()}</span><p><strong>@{item.author}</strong>{item.text}</p></div>)}

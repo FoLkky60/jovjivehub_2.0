@@ -1,14 +1,13 @@
 "use client";
 
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { FeedPostCard } from "@/app/component/FeedPostCard";
 import { TopBar } from "@/app/component/TopBar";
-import { createFeedPost, createSharedFeedPost, getFeedPosts } from "@/app/services/mock-feed-service";
 import { FeedMediaType, FeedPost } from "@/app/types/feed";
 
 export function FeedPage() {
-  const [posts, setPosts] = useState<FeedPost[]>(getFeedPosts);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
   const [text, setText] = useState("");
   const [mediaType, setMediaType] = useState<FeedMediaType | undefined>();
   const [mediaUrl, setMediaUrl] = useState<string>();
@@ -16,6 +15,9 @@ export function FeedPage() {
   const [shareText, setShareText] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    fetch("/api/feed", { cache: "no-store" }).then((response) => response.json()).then((data: { posts?: FeedPost[] }) => setPosts(data.posts ?? []));
+  }, []);
 
   function chooseMedia(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -25,9 +27,11 @@ export function FeedPage() {
     setMediaUrl(URL.createObjectURL(file));
   }
 
-  function publishPost() {
+  async function publishPost() {
     if (!text.trim() && !mediaUrl) return;
-    const post = createFeedPost(text.trim(), mediaType, mediaUrl);
+    const response = await fetch("/api/feed", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: text.trim(), mediaType, mediaUrl }) });
+    if (!response.ok) return;
+    const { post } = await response.json() as { post: FeedPost };
     setPosts((currentPosts) => [post, ...currentPosts]);
     setText("");
     setMediaType(undefined);
@@ -35,9 +39,11 @@ export function FeedPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function publishShare() {
+  async function publishShare() {
     if (!sharePost) return;
-    const sharedPost = createSharedFeedPost(sharePost, shareText.trim() || `Shared from @${sharePost.authorUsername}`);
+    const response = await fetch("/api/feed", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: shareText.trim() || `Shared from @${sharePost.authorUsername}`, mediaType: sharePost.mediaType, mediaUrl: sharePost.mediaUrl }) });
+    if (!response.ok) return;
+    const { post: sharedPost } = await response.json() as { post: FeedPost };
     setPosts((currentPosts) => [sharedPost, ...currentPosts]);
     setSharePost(undefined);
     setShareText("");
